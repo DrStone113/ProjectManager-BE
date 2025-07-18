@@ -1,0 +1,1194 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Project Manager API",
+      "version": "1.0.0",
+      "description": "API cho hệ thống quản lý dự án nhóm"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000/api",
+        "description": "Local Development Server"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Authentication",
+        "description": "API liên quan đến đăng ký và đăng nhập người dùng"
+      },
+      {
+        "name": "Projects",
+        "description": "API quản lý dự án"
+      },
+      {
+        "name": "Tasks",
+        "description": "API quản lý công việc (tasks)"
+      }
+    ],
+    "paths": {
+      "/auth/register": {
+        "post": {
+          "tags": ["Authentication"],
+          "summary": "Đăng ký người dùng mới",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["username", "email", "password"],
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "example": "john_doe"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "john.doe@example.com"
+                    },
+                    "password": {
+                      "type": "string",
+                      "format": "password",
+                      "example": "password123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Đăng ký thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Đăng ký thành công!"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Người dùng đã tồn tại hoặc dữ liệu không hợp lệ",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Người dùng đã tồn tại với email này."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Lỗi Server",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Lỗi Server."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/auth/login": {
+        "post": {
+          "tags": ["Authentication"],
+          "summary": "Đăng nhập người dùng",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["email", "password"],
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "john.doe@example.com"
+                    },
+                    "password": {
+                      "type": "string",
+                      "format": "password",
+                      "example": "password123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đăng nhập thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "token": {
+                        "type": "string",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Thông tin đăng nhập không hợp lệ",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Thông tin đăng nhập không hợp lệ."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Lỗi Server",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Lỗi Server."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/projects": {
+        "post": {
+          "tags": ["Projects"],
+          "summary": "Tạo dự án mới",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "Dự án Phát triển Backend"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Xây dựng các API cho hệ thống quản lý dự án."
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-07-20T09:00:00Z"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-09-30T17:00:00Z"
+                    },
+                    "members": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": ["Project Manager", "Team Lead", "Member"],
+                            "example": "Member"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Dự án được tạo thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "format": "uuid" },
+                      "name": { "type": "string" },
+                      "description": { "type": "string" },
+                      "startDate": { "type": "string", "format": "date-time" },
+                      "endDate": { "type": "string", "format": "date-time" },
+                      "status": { "type": "string" },
+                      "createdBy": { "type": "string", "format": "uuid" },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "userId": { "type": "string", "format": "uuid" },
+                            "role": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Lỗi Server",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": ["Projects"],
+          "summary": "Lấy tất cả dự án của người dùng",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Danh sách các dự án",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" },
+                        "name": { "type": "string" },
+                        "description": { "type": "string" },
+                        "status": { "type": "string" },
+                        "members": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "userId": { "type": "string", "format": "uuid" },
+                              "role": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        }
+      },
+      "/projects/{id}": {
+        "get": {
+          "tags": ["Projects"],
+          "summary": "Lấy một dự án theo ID",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Thông tin dự án",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "format": "uuid" },
+                      "name": { "type": "string" },
+                      "description": { "type": "string" },
+                      "status": { "type": "string" },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "userId": { "type": "string", "format": "uuid" },
+                            "role": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập dự án"
+            },
+            "404": {
+              "description": "Không tìm thấy dự án"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        },
+        "put": {
+          "tags": ["Projects"],
+          "summary": "Cập nhật dự án",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án cần cập nhật"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "Dự án Phát triển Backend (Cập nhật)"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Xây dựng các API cho hệ thống quản lý dự án (đã cập nhật)."
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-07-20T09:00:00Z"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-10-31T17:00:00Z"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["Planning", "Active", "Completed", "Archived"],
+                      "example": "Active"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Dự án được cập nhật thành công"
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền cập nhật dự án"
+            },
+            "404": {
+              "description": "Không tìm thấy dự án"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        },
+        "delete": {
+          "tags": ["Projects"],
+          "summary": "Xóa dự án",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án cần xóa"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Dự án đã được xóa",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "Dự án đã được xóa." }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền xóa dự án"
+            },
+            "404": {
+              "description": "Không tìm thấy dự án"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        }
+      },
+      "/projects/{id}/members": {
+        "post": {
+          "tags": ["Projects"],
+          "summary": "Thêm thành viên vào dự án",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["userId", "role"],
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": ["Project Manager", "Team Lead", "Member"],
+                      "example": "Member"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Thành viên đã được thêm vào dự án"
+            },
+            "400": {
+              "description": "Người dùng đã là thành viên hoặc người được giao việc không phải là thành viên của dự án"
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền thêm thành viên"
+            },
+            "404": {
+              "description": "Không tìm thấy dự án hoặc người dùng"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        }
+      },
+      "/projects/{projectId}/members/{userId}": {
+        "put": {
+          "tags": ["Projects"],
+          "summary": "Cập nhật vai trò thành viên trong dự án",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "projectId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án"
+            },
+            {
+              "name": "userId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của thành viên"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["role"],
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": ["Project Manager", "Team Lead", "Member"],
+                      "example": "Team Lead"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Vai trò thành viên đã được cập nhật"
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền cập nhật vai trò"
+            },
+            "404": {
+              "description": "Không tìm thấy dự án hoặc thành viên"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        },
+        "delete": {
+          "tags": ["Projects"],
+          "summary": "Xóa thành viên khỏi dự án",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "projectId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án"
+            },
+            {
+              "name": "userId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của thành viên cần xóa"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Thành viên đã được xóa khỏi dự án"
+            },
+            "400": {
+              "description": "Không thể xóa Project Manager duy nhất"
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền xóa thành viên"
+            },
+            "404": {
+              "description": "Không tìm thấy dự án hoặc thành viên"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        }
+      },
+      "/tasks/{projectId}": {
+        "post": {
+          "tags": ["Tasks"],
+          "summary": "Tạo task mới trong một dự án",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "projectId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án mà task thuộc về"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["title"],
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "Hoàn thành thiết kế UI/UX"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Thiết kế giao diện người dùng cho các trang chính."
+                    },
+                    "assignedTo": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true,
+                      "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                    },
+                    "dueDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-08-01T17:00:00Z"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["To Do", "In Progress", "Done", "Blocked"],
+                      "example": "To Do"
+                    },
+                    "priority": {
+                      "type": "string",
+                      "enum": ["Low", "Medium", "High", "Urgent"],
+                      "example": "High"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Task được tạo thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "success" },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "task": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string", "format": "uuid" },
+                              "title": { "type": "string" },
+                              "description": { "type": "string" },
+                              "projectId": { "type": "string", "format": "uuid" },
+                              "assignedTo": { "type": "string", "format": "uuid", "nullable": true },
+                              "assignedBy": { "type": "string", "format": "uuid" },
+                              "dueDate": { "type": "string", "format": "date-time" },
+                              "status": { "type": "string" },
+                              "priority": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ hoặc người được giao việc không phải thành viên dự án",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "fail" },
+                      "data": { "type": "object", "properties": { "message": { "type": "string" } } }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền giao việc hoặc không phải thành viên dự án",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "fail" },
+                      "data": { "type": "object", "properties": { "message": { "type": "string" } } }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy dự án",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "fail" },
+                      "data": { "type": "object", "properties": { "message": { "type": "string" } } }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Lỗi Server",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "error" },
+                      "message": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": ["Tasks"],
+          "summary": "Lấy tất cả task của một dự án",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "projectId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của dự án"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Danh sách các task",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "success" },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "tasks": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": { "type": "string", "format": "uuid" },
+                                "title": { "type": "string" },
+                                "description": { "type": "string" },
+                                "projectId": { "type": "string", "format": "uuid" },
+                                "assignedTo": { "type": "string", "format": "uuid", "nullable": true },
+                                "assignedBy": { "type": "string", "format": "uuid" },
+                                "dueDate": { "type": "string", "format": "date-time" },
+                                "status": { "type": "string" },
+                                "priority": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập task"
+            },
+            "404": {
+              "description": "Không tìm thấy dự án"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        }
+      },
+      "/tasks/detail/{id}": {
+        "get": {
+          "tags": ["Tasks"],
+          "summary": "Lấy một task theo ID",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của task"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Thông tin task",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "success" },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "task": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string", "format": "uuid" },
+                              "title": { "type": "string" },
+                              "description": { "type": "string" },
+                              "projectId": { "type": "string", "format": "uuid" },
+                              "assignedTo": { "type": "string", "format": "uuid", "nullable": true },
+                              "assignedBy": { "type": "string", "format": "uuid" },
+                              "dueDate": { "type": "string", "format": "date-time" },
+                              "status": { "type": "string" },
+                              "priority": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập task"
+            },
+            "404": {
+              "description": "Không tìm thấy task"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        }
+      },
+      "/tasks/{id}": {
+        "put": {
+          "tags": ["Tasks"],
+          "summary": "Cập nhật task",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của task cần cập nhật"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "Hoàn thành thiết kế UI/UX (đã cập nhật)"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Thiết kế giao diện người dùng cho các trang chính (đã cập nhật)."
+                    },
+                    "assignedTo": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true,
+                      "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                    },
+                    "dueDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-08-05T17:00:00Z"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["To Do", "In Progress", "Done", "Blocked"],
+                      "example": "In Progress"
+                    },
+                    "priority": {
+                      "type": "string",
+                      "enum": ["Low", "Medium", "High", "Urgent"],
+                      "example": "Medium"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Task được cập nhật thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "success" },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "task": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string", "format": "uuid" },
+                              "title": { "type": "string" },
+                              "description": { "type": "string" },
+                              "projectId": { "type": "string", "format": "uuid" },
+                              "assignedTo": { "type": "string", "format": "uuid", "nullable": true },
+                              "assignedBy": { "type": "string", "format": "uuid" },
+                              "dueDate": { "type": "string", "format": "date-time" },
+                              "status": { "type": "string" },
+                              "priority": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ hoặc người được giao việc không phải thành viên dự án"
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền cập nhật task"
+            },
+            "404": {
+              "description": "Không tìm thấy task"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        },
+        "delete": {
+          "tags": ["Tasks"],
+          "summary": "Xóa task",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "description": "ID của task cần xóa"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Task đã được xóa",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string", "example": "success" },
+                      "data": { "type": "object", "nullable": true },
+                      "message": { "type": "string", "example": "Task đã được xóa." }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Không có token hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền xóa task"
+            },
+            "404": {
+              "description": "Không tìm thấy task"
+            },
+            "500": {
+              "description": "Lỗi Server"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    }
+  }
+  
